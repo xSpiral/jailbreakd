@@ -4,7 +4,13 @@
  */
 #include "kernel_call.h"
 
+#include "kern_utils.h"
+#include "kernel_memory.h"
+#include "offsetof.h"
+
 #include <assert.h>
+#include <mach/vm_region.h>
+#include <mach-o/loader.h>
 
 #include "pac.h"
 #include "user_client.h"
@@ -14,6 +20,11 @@
 
 bool
 kernel_call_init() {
+    
+    kernel_task_port = tfpzero;
+    kernel_task = kernel_read64(find_port(tfpzero) + offsetof_ip_kobject);
+    current_task = kernel_read64(find_port(mach_task_self()) + offsetof_ip_kobject);
+    
 	bool ok = stage1_kernel_call_init()
 		&& stage2_kernel_call_init()
 		&& stage3_kernel_call_init();
